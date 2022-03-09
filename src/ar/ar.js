@@ -72,8 +72,14 @@ const AR = React.memo(({
       }
     }, onCameraStreamError)
 
-    arContext.arToolkitContext.init(() =>
-      camera.projectionMatrix.copy(arContext.arToolkitContext.getProjectionMatrix())
+    arContext.arToolkitContext.init(() => {
+      arContext.arToolkitContext.arController.orientation = getSourceOrientation();
+			arContext.arToolkitContext.arController.options.orientation = getSourceOrientation();
+
+			console.log('arToolkitContext', arContext.arToolkitContext);
+			window.arContext.arToolkitContext = arContext.arToolkitContext;
+      camera.projectionMatrix.copy(arContext.arToolkitContext.getProjectionMatrix());
+      }
     )
 
     window.addEventListener("resize", onResize)
@@ -90,6 +96,26 @@ const AR = React.memo(({
       arContext.arToolkitContext.update(arContext.arToolkitSource.domElement)
     }
   })
+
+  var getSourceOrientation = function() {
+    if (!arToolkitSource) {
+      return null;
+    }
+  
+    console.log(
+      'actual source dimensions',
+      arToolkitSource.domElement.videoWidth,
+      arToolkitSource.domElement.videoHeight
+    );
+  
+    if (arToolkitSource.domElement.videoWidth > arToolkitSource.domElement.videoHeight) {
+      console.log('source orientation', 'landscape');
+      return 'landscape';
+    } else {
+      console.log('source orientation', 'portrait');
+      return 'portrait';
+    }
+  }
 
   const value = useMemo(() => ({ arToolkitContext: arContext.arToolkitContext }), [arContext])
 
